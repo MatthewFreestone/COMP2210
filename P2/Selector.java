@@ -3,12 +3,12 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
-import java.util.NoSuchElementException; //TODO originals
+import java.util.NoSuchElementException; 
 
 /**
  * Defines a library of selection methods on Collections.
  *
- * @author  YOUR NAME HERE (you@auburn.edu)
+ * @author  Matthew Freestone (maf0083@auburn.edu)
  *
  */
 public final class Selector {
@@ -98,9 +98,29 @@ public final class Selector {
      * @throws        IllegalArgumentException as per above
      * @throws        NoSuchElementException as per above
      */
-    public static <T> T kmin(Collection<T> coll, int k, Comparator<T> comp) {
-        return null;
+    public static <T> T kmin(Collection<T> coll, int k, Comparator<T> comp) { //O(n^2)
+        if (coll == null || comp == null){
+            throw new IllegalArgumentException();
+        }
+        if (coll.size() == 0){
+            throw new NoSuchElementException();
+        }
+
+        List<T> uniqueVals = new ArrayList<T>();
+        for (T c: coll){
+            if (!uniqueVals.contains(c)){
+                uniqueVals.add(c);
+            }
+        }
+        if (k > uniqueVals.size() || k < 1){
+            throw new NoSuchElementException();
+        }
+
+        java.util.Collections.sort(uniqueVals, comp);
+        return uniqueVals.get(k-1);
     }
+
+   
 
 
     /**
@@ -117,10 +137,27 @@ public final class Selector {
      * @throws        IllegalArgumentException as per above
      * @throws        NoSuchElementException as per above
      */
-    public static <T> T kmax(Collection<T> coll, int k, Comparator<T> comp) {
-        return null;
-    }
+    public static <T> T kmax(Collection<T> coll, int k, Comparator<T> comp) { 
+        if (coll == null || comp == null){
+            throw new IllegalArgumentException();
+        }
+        if (coll.size() == 0){
+            throw new NoSuchElementException();
+        }
 
+        List<T> uniqueVals = new ArrayList<T>();
+        for (T c: coll){
+            if (!uniqueVals.contains(c)){
+                uniqueVals.add(c);
+            }
+        }
+        if (k > uniqueVals.size() || k < 1){
+            throw new NoSuchElementException();
+        }
+
+        java.util.Collections.sort(uniqueVals, comp.reversed());
+        return uniqueVals.get(k-1);
+    }
 
     /**
      * Returns a new Collection containing all the values in the Collection coll
@@ -145,10 +182,13 @@ public final class Selector {
         if (coll == null || comp == null){
             throw new IllegalArgumentException();
         }
+        if (coll.size() == 0){
+            throw new NoSuchElementException();
+        }
 
         Collection<T> out = new ArrayList<T>();
         for(T val: coll){
-            if (comp.compare(val, low) >= 1 &&  comp.compare(val, high) <= 1){
+            if (comp.compare(val, low) >= 0 &&  comp.compare(val, high) <= 0){
                 out.add(val);
             } 
         }
@@ -176,7 +216,34 @@ public final class Selector {
      * @throws        NoSuchElementException as per above
      */
     public static <T> T ceiling(Collection<T> coll, T key, Comparator<T> comp) {
-        return null;
+        if (coll == null || comp == null){
+            throw new IllegalArgumentException();
+        }
+        if (coll.size() == 0){
+            throw new NoSuchElementException();
+        }
+
+        T min = null;
+        Iterator<T> i = coll.iterator();
+        while(i.hasNext()){ //go till first val above key found  
+            T curr = i.next();
+            if(comp.compare(curr, key) >= 0){
+                min = curr;
+                break;
+            }
+        }
+
+        if (min == null){ //could also do !i.hasNext()
+            throw new NoSuchElementException();
+        }
+
+        while(i.hasNext()){ //go thrugh rest to see if any are lower than first min
+            T curr = i.next();
+            if(comp.compare(curr, key) >= 0 && comp.compare(curr, min) < 0){
+                min = curr;
+            }
+        } 
+        return min;
     }
 
 
@@ -196,7 +263,34 @@ public final class Selector {
      * @throws        NoSuchElementException as per above
      */
     public static <T> T floor(Collection<T> coll, T key, Comparator<T> comp) {
-        return null;
+        if (coll == null || comp == null){
+            throw new IllegalArgumentException();
+        }
+        if (coll.size() == 0){
+            throw new NoSuchElementException();
+        }
+
+        T max = null;
+        Iterator<T> i = coll.iterator();
+        while(i.hasNext()){ //go till first val below key found  
+            T curr = i.next();
+            if(comp.compare(curr, key) <= 0){
+                max = curr;
+                break;
+            }
+        }
+
+        if (max == null){ //could also do !i.hasNext()
+            throw new NoSuchElementException();
+        }
+
+        while(i.hasNext()){ //go thrugh rest to see if any are higher than first max
+            T curr = i.next();
+            if(comp.compare(curr, key) <= 0 && comp.compare(curr, max) > 0){
+                max = curr;
+            }
+        } 
+        return max;
     }
 
 }
