@@ -1,83 +1,355 @@
 import java.util.Iterator;
-import java.util.Set;
-import java.util.ArrayList;
+import java.util.NoSuchElementException;
 
-class LinkedSet<T extends Comparable<T>> implements Set<T>{
-    Node first = null;
-    Node last; 
+/**
+ * Provides an implementation of the Set interface.
+ * A doubly-linked list is used as the underlying data structure.
+ * Although not required by the interface, this linked list is
+ * maintained in ascending natural order. In those methods that
+ * take a LinkedSet as a parameter, this order is used to increase
+ * efficiency.
+ *
+ * @author Dean Hendrix (dh@auburn.edu)
+ * @author YOUR NAME (you@auburn.edu)
+ *
+ */
+public class LinkedSet<T extends Comparable<T>> implements Set<T> {
 
-    private class Node<T>{
-        Node next;
-        Node prev; 
-        T e; 
+    //////////////////////////////////////////////////////////
+    // Do not change the following three fields in any way. //
+    //////////////////////////////////////////////////////////
 
-        Node(T e) {
-            this.e = e;
-        }
-        Node(T e, Node next, Node prev) {
-            this.e = e;
-            this.next = next;
-            this.prev = prev;
-        }
+    /** References to the first and last node of the list. */
+    Node front;
+    Node rear;
+
+    /** The number of nodes in the list. */
+    int size;
+
+    /////////////////////////////////////////////////////////
+    // Do not change the following constructor in any way. //
+    /////////////////////////////////////////////////////////
+
+    /**
+     * Instantiates an empty LinkedSet.
+     */
+    public LinkedSet() {
+        front = null;
+        rear = null;
+        size = 0;
     }
 
+
+    //////////////////////////////////////////////////
+    // Public interface and class-specific methods. //
+    //////////////////////////////////////////////////
+
+    ///////////////////////////////////////
+    // DO NOT CHANGE THE TOSTRING METHOD //
+    ///////////////////////////////////////
+    /**
+     * Return a string representation of this LinkedSet.
+     *
+     * @return a string representation of this LinkedSet
+     */
     @Override
-    public boolean add(T e) {
-        if (first == null){
-            first = new Node(e);
+    public String toString() {
+        if (isEmpty()) {
+            return "[]";
+        }
+        StringBuilder result = new StringBuilder();
+        result.append("[");
+        for (T element : this) {
+            result.append(element + ", ");
+        }
+        result.delete(result.length() - 2, result.length());
+        result.append("]");
+        return result.toString();
+    }
+
+
+    ///////////////////////////////////
+    // DO NOT CHANGE THE SIZE METHOD //
+    ///////////////////////////////////
+    /**
+     * Returns the current size of this collection.
+     *
+     * @return  the number of elements in this collection.
+     */
+    public int size() {
+        return size;
+    }
+
+    //////////////////////////////////////
+    // DO NOT CHANGE THE ISEMPTY METHOD //
+    //////////////////////////////////////
+    /**
+     * Tests to see if this collection is empty.
+     *
+     * @return  true if this collection contains no elements, false otherwise.
+     */
+    public boolean isEmpty() {
+        return (size == 0);
+    }
+
+
+    /**
+     * Ensures the collection contains the specified element. Neither duplicate
+     * nor null values are allowed. This method ensures that the elements in the
+     * linked list are maintained in ascending natural order.
+     *
+     * @param  element  The element whose presence is to be ensured.
+     * @return true if collection is changed, false otherwise.
+     */
+    public boolean add(T element) {
+        if (isEmpty()){
+        	Node n = new Node(element);
+        	front = n;
+        	back = n; 
+        	return true;
+        }
+        Node n = front;
+        while (n.element.compareTo(element) < 0 && n.next != null){
+            n = n.next;
+        }
+        if (n.element.compareTo(element) == 0){
+            return false;
+        }
+        if (n.element.compareTo(element) > 0){
+            Node p = new Node(element);
+            p.prev = n.prev;
+            n.prev.next = p;
+            p.next = n;
+            n.prev = p; 
             return true;
         }
 
-        // TODO Auto-generated method stub
-        return false;
+
     }
-    @Override
-    public boolean remove(Object e) {
-        // TODO Auto-generated method stub
-        return false;
-    }
+
     /**
-     * Returns {@code true} if this set contains the specified element.
-     * More formally, returns {@code true} if and only if this set
-     * contains an element {@code e} such that
-     * {@code Objects.equals(o, e)}.
+     * Ensures the collection does not contain the specified element.
+     * If the specified element is present, this method removes it
+     * from the collection. This method, consistent with add, ensures
+     * that the elements in the linked lists are maintained in ascending
+     * natural order.
      *
-     * @param o element whose presence in this set is to be tested
-     * @return {@code true} if this set contains the specified element
-     * @throws ClassCastException if the type of the specified element
-     *         is incompatible with this set
-     * (<a href="Collection.html#optional-restrictions">optional</a>)
-     * @throws NullPointerException if the specified element is null and this
-     *         set does not permit null elements
-     * (<a href="Collection.html#optional-restrictions">optional</a>)
+     * @param   element  The element to be removed.
+     * @return  true if collection is changed, false otherwise.
      */
-    @Override
-    public boolean contains(Object o) {
-        Class type = ((T) new Object()).getClass(); //ow
-        if (!type.isInstance(o)){
-            throw new ClassCastException();
+    public boolean remove(T element) {
+        if (isEmpty()){
+        	return false;
         }
+        Node n = front;
+        while (n.element.compareTo(element) != 0 && n.next != null){
+            n = n.next;
+        }
+        if (n.element.compareTo(element) == 0){
+            n.prev.next = n.next;
+            n.next.prev = n.prev;
+            return true; 
+        }
+        else{
+            return false; 
+        }
+    }
+
+
+    /**
+     * Searches for specified element in this collection.
+     *
+     * @param   element  The element whose presence in this collection is to be tested.
+     * @return  true if this collection contains the specified element, false otherwise.
+     */
+    public boolean contains(T element) {
+        if (isEmpty()){
+        	return false;
+        }
+        Node n = front;
+        while (n.element.compareTo(element) != 0 && n.next != null){
+            n = n.next;
+        }
+        if (n.element.compareTo(element) == 0){
+            return true; 
+        }
+        else{
+            return false; 
+        }
+    }
+
+
+    /**
+     * Tests for equality between this set and the parameter set.
+     * Returns true if this set contains exactly the same elements
+     * as the parameter set, regardless of order.
+     *
+     * @return  true if this set contains exactly the same elements as
+     *               the parameter set, false otherwise
+     */
+    public boolean equals(Set<T> s) {
+       for (T e: s){
+           if (!this.contains(e)){
+               return false; 
+           }
+       }
+       return true; 
+    }
+
+
+    /**
+     * Tests for equality between this set and the parameter set.
+     * Returns true if this set contains exactly the same elements
+     * as the parameter set, regardless of order.
+     *
+     * @return  true if this set contains exactly the same elements as
+     *               the parameter set, false otherwise
+     */
+    public boolean equals(LinkedSet<T> s) {
         return false;
     }
-    @Override
-    public int size() {
-        // TODO Auto-generated method stub
-        return 0;
-    }
-    @Override
-    public boolean isEmpty() {
-        // TODO Auto-generated method stub
-        return false;
-    }
-    @Override
-    public Iterator<T> iterator() {
-        // TODO Auto-generated method stub
+
+
+    /**
+     * Returns a set that is the union of this set and the parameter set.
+     *
+     * @return  a set that contains all the elements of this set and the parameter set
+     */
+    public Set<T> union(Set<T> s){
         return null;
     }
-    @Override
-    public boolean equals(Object obj) {
-        // TODO Auto-generated method stub
-        return super.equals(obj);
+
+
+    /**
+     * Returns a set that is the union of this set and the parameter set.
+     *
+     * @return  a set that contains all the elements of this set and the parameter set
+     */
+    public Set<T> union(LinkedSet<T> s){
+        return null;
+    }
+
+
+    /**
+     * Returns a set that is the intersection of this set and the parameter set.
+     *
+     * @return  a set that contains elements that are in both this set and the parameter set
+     */
+    public Set<T> intersection(Set<T> s) {
+        return null;
+    }
+
+    /**
+     * Returns a set that is the intersection of this set and
+     * the parameter set.
+     *
+     * @return  a set that contains elements that are in both
+     *            this set and the parameter set
+     */
+    public Set<T> intersection(LinkedSet<T> s) {
+        return null;
+    }
+
+
+    /**
+     * Returns a set that is the complement of this set and the parameter set.
+     *
+     * @return  a set that contains elements that are in this set but not the parameter set
+     */
+    public Set<T> complement(Set<T> s) {
+        return null;
+    }
+
+
+    /**
+     * Returns a set that is the complement of this set and
+     * the parameter set.
+     *
+     * @return  a set that contains elements that are in this
+     *            set but not the parameter set
+     */
+    public Set<T> complement(LinkedSet<T> s) {
+        return null;
+    }
+
+
+    /**
+     * Returns an iterator over the elements in this LinkedSet.
+     * Elements are returned in ascending natural order.
+     *
+     * @return  an iterator over the elements in this LinkedSet
+     */
+    public Iterator<T> iterator() {
+        return null;
+    }
+
+
+    /**
+     * Returns an iterator over the elements in this LinkedSet.
+     * Elements are returned in descending natural order.
+     *
+     * @return  an iterator over the elements in this LinkedSet
+     */
+    public Iterator<T> descendingIterator() {
+        return null;
+    }
+
+
+    /**
+     * Returns an iterator over the members of the power set
+     * of this LinkedSet. No specific order can be assumed.
+     *
+     * @return  an iterator over members of the power set
+     */
+    public Iterator<Set<T>> powerSetIterator() {
+        return null;
+    }
+
+
+
+    //////////////////////////////
+    // Private utility methods. //
+    //////////////////////////////
+
+    // Feel free to add as many private methods as you need.
+
+    ////////////////////
+    // Nested classes //
+    ////////////////////
+
+    //////////////////////////////////////////////
+    // DO NOT CHANGE THE NODE CLASS IN ANY WAY. //
+    //////////////////////////////////////////////
+
+    /**
+     * Defines a node class for a doubly-linked list.
+     */
+    class Node {
+        /** the value stored in this node. */
+        T element;
+        /** a reference to the node after this node. */
+        Node next;
+        /** a reference to the node before this node. */
+        Node prev;
+
+        /**
+         * Instantiate an empty node.
+         */
+        public Node() {s
+            element = null;
+            next = null;
+            prev = null;
+        }
+
+        /**
+         * Instantiate a node that containts element
+         * and with no node before or after it.
+         */
+        public Node(T e) {
+            element = e;
+            next = null;
+            prev = null;
+        }
     }
 
 }
