@@ -4,7 +4,7 @@ import java.util.Iterator;
  * A collection that implements set behavior.
  *
  * @author  Dean Hendrix (dh@auburn.edu)
- * @author YOUR NAME (yourid@auburn.edu)
+ * @author Matthew Freestone (yourid@auburn.edu)
  *
  */
 
