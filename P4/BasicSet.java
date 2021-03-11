@@ -1,5 +1,8 @@
 import java.util.HashSet;
 import java.util.Iterator;
+/**
+ * Class used for testing basics on Set interface, not for actual use
+ */
 public class BasicSet<T> implements Set<T>{
     HashSet<T> set; 
 
@@ -20,22 +23,23 @@ public class BasicSet<T> implements Set<T>{
     }
     @Override
     public Set<T> union(Set<T> s) {
-        //TODO Auto-generated method stub
         return null;
     }
     @Override
     public Set<T> intersection(Set<T> s) {
-        // TODO Auto-generated method stub
         return null;
     }
     @Override
     public Set<T> complement(Set<T> s) {
-        // TODO Auto-generated method stub
         return null;
     }
     @Override
     public boolean equals(Set<T> s) {
-        return set.equals(s);
+        if (s.getClass() == this.getClass()){
+            BasicSet<T> sh = (BasicSet<T>)s;
+            return (this.set.equals(sh.set));
+        }
+        return s.equals(this); //bad practice, but less work 
     }
     @Override
     public Iterator<T> iterator() {

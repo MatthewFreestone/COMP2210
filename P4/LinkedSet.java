@@ -1,7 +1,4 @@
 import java.util.Iterator;
-
-import javax.swing.plaf.synth.SynthEditorPaneUI;
-
 /**
  * Provides an implementation of the Set interface.
  * A doubly-linked list is used as the underlying data structure.
@@ -156,6 +153,23 @@ public class LinkedSet<T extends Comparable<T>> implements Set<T> {
 
     }
 
+    private boolean addEnd(T element){ //only use when you know it belongs at end and not duplicate 
+        if (isEmpty()){
+        	Node n = new Node(element);
+        	front = n;
+        	rear = n; 
+            size++;
+        	return true;
+        }
+        Node p = rear;
+        Node n = new Node(element);
+        p.next = n;
+        n.prev = p;
+        rear = n; 
+        size++;
+        return true; 
+    }
+
 
     /**
      * Ensures the collection does not contain the specified element.
@@ -235,7 +249,7 @@ public class LinkedSet<T extends Comparable<T>> implements Set<T> {
      * @return  true if this set contains exactly the same elements as
      *               the parameter set, false otherwise
      */
-    public boolean equals(Set<T> s) { //TODO test
+    public boolean equals(Set<T> s) { 
         if (this.size() != s.size()){
             return false; 
         }
@@ -256,7 +270,7 @@ public class LinkedSet<T extends Comparable<T>> implements Set<T> {
      * @return  true if this set contains exactly the same elements as
      *               the parameter set, false otherwise
      */
-    public boolean equals(LinkedSet<T> s) { //TODO Test
+    public boolean equals(LinkedSet<T> s) { 
         Node n = this.front;
         Node m = s.front;
         while (n != null && m !=null && n.element.compareTo(m.element) == 0){
@@ -277,15 +291,13 @@ public class LinkedSet<T extends Comparable<T>> implements Set<T> {
      *
      * @return  a set that contains all the elements of this set and the parameter set
      */
-    public Set<T> union(Set<T> s){ 
+    public Set<T> union(Set<T> s){  //TODO double check 
         LinkedSet<T> out = new LinkedSet<>();
-        for (T e: this){
-            out.add(e);
-            out.size++;
+        for (T e: this){ //iterator checks if empty
+            out.addEnd(e); //O(1) add to new out bc we know those points are in order and valid 
         }
-        for (T e: s){
+        for (T e: s){ //their iterater should check if empty 
             out.add(e);
-            out.size++;
         }
         return out;
     }
@@ -297,10 +309,24 @@ public class LinkedSet<T extends Comparable<T>> implements Set<T> {
      * @return  a set that contains all the elements of this set and the parameter set
      */
     public Set<T> union(LinkedSet<T> s){
+        if (this.isEmpty() && s.isEmpty()){
+            return new LinkedSet<T>();
+        }
+        else if (this.isEmpty()){
+            return s; 
+        }
+        else if (s.isEmpty()){
+            return this; 
+        }
         LinkedSet<T> out = new LinkedSet<>();
         Node n = this.front;
         Node m = s.front;
-        if (n.element.compareTo(m.element) < 0){
+        if (n.element.compareTo(m.element) == 0){ //if they start with the same, increment both 
+            out.front = new Node(n.element);
+            n = n.next;
+            m = m.next;
+        }
+        else if (n.element.compareTo(m.element) < 0){
             out.front = new Node(n.element);
             n = n.next;
         }
@@ -340,7 +366,6 @@ public class LinkedSet<T extends Comparable<T>> implements Set<T> {
             out.size++;
         }
 
-        //n != this.rear
         if (n != null){
             while(n != null){
                 Node nn = new Node(n.element);
@@ -352,7 +377,6 @@ public class LinkedSet<T extends Comparable<T>> implements Set<T> {
                 out.size++;
             }
         }
-        //m != s.rear
         else if (m != null){
             while(m != null){
                 Node mm = new Node(m.element);
@@ -378,10 +402,13 @@ public class LinkedSet<T extends Comparable<T>> implements Set<T> {
      * @return  a set that contains elements that are in both this set and the parameter set
      */
     public Set<T> intersection(Set<T> s) {
-        Set<T> out = new LinkedSet<>();
-        for (T e: s){
-            if (this.contains(e)){
-                out.add(e);
+        if(this.isEmpty() || s.isEmpty()){
+            return new LinkedSet<T>();
+        }
+        LinkedSet<T> out = new LinkedSet<>();
+        for (T e: this){
+            if (s.contains(e)){ //O(n)?? hopefully??
+                out.addEnd(e); //we can't get new terms, so we know theyre in order and valid 
             }
         }
         return out; 
@@ -394,8 +421,28 @@ public class LinkedSet<T extends Comparable<T>> implements Set<T> {
      * @return  a set that contains elements that are in both
      *            this set and the parameter set
      */
-    public Set<T> intersection(LinkedSet<T> s) {
-        return null;
+    public Set<T> intersection(LinkedSet<T> s) { //TODO TEST
+        if(this.isEmpty() || s.isEmpty()){
+            return new LinkedSet<T>();
+        }
+        LinkedSet<T> out = new LinkedSet<>();
+        Node n = this.front;
+        Node m = s.front;
+        while (n != null && m != null){
+            int comp = n.element.compareTo(m.element);
+            if (comp < 0) {//n before m 
+                n = n.next; //therefore n cant be in m, so go next
+            }
+            else if (comp == 0) { //n = m
+                out.addEnd(n.element); //add it to final 
+                n = n.next; //iterate both 
+                m = m.next;
+            }
+            else{ //n after m 
+                m = m.next; //n could be in but m cant, so iterate m
+            }
+        }
+        return out; 
     }
 
 
@@ -405,7 +452,19 @@ public class LinkedSet<T extends Comparable<T>> implements Set<T> {
      * @return  a set that contains elements that are in this set but not the parameter set
      */
     public Set<T> complement(Set<T> s) {
-        return null;
+        if (this.isEmpty()){
+            return new LinkedSet<T>();
+        }
+        if (s.isEmpty()){
+            return this; 
+        }
+        LinkedSet<T> out = new LinkedSet<>();
+        for (T e: this){
+            if (!s.contains(e)){ //can only elim elements
+                out.addEnd(e); //same order they came in as, so can assume valid and in order
+            }
+        }
+        return out; 
     }
 
 
@@ -417,7 +476,36 @@ public class LinkedSet<T extends Comparable<T>> implements Set<T> {
      *            set but not the parameter set
      */
     public Set<T> complement(LinkedSet<T> s) {
-        return null;
+        if (this.isEmpty()){
+            return new LinkedSet<T>();
+        }
+        if (s.isEmpty()){
+            return this; 
+        }
+        LinkedSet<T> out = new LinkedSet<T>(); 
+        Node n = this.front;
+        Node m = s.front;
+        while (n != null && m != null){
+            int comp = n.element.compareTo(m.element);
+            if (comp < 0) {//n before m, meaning m cant have it, so add it 
+                out.addEnd(n.element); //TODO does this work
+                n = n.next;
+            }
+            else if (comp == 0){ //m contained n, so dont add it 
+                n = n.next;
+                m = m.next;
+            }
+            else{ //n after m, meaning m could still contain it, so iterate m; 
+                m = m.next;
+            }
+        }
+        if (m == null){
+            while(n!=null){
+                out.addEnd(n.element); //TODO check validity 
+                n = n.next;
+            }
+        }
+        return out;
     }
 
 
@@ -440,10 +528,7 @@ public class LinkedSet<T extends Comparable<T>> implements Set<T> {
         }
         @Override
         public boolean hasNext() {
-            if (p != null){
-                return true;
-            }
-            return false;
+            return (p!=null);
         }
         @Override
         public T next() {
@@ -461,9 +546,28 @@ public class LinkedSet<T extends Comparable<T>> implements Set<T> {
      * @return  an iterator over the elements in this LinkedSet
      */
     public Iterator<T> descendingIterator() {
-        return null;
+        return new LinkedSetDecIterator(this);
     }
 
+    //making it T instead of E causes problems 
+    class LinkedSetDecIterator implements Iterator<T>{
+        Node p;
+        public LinkedSetDecIterator(LinkedSet<T> s)
+        {
+            p = s.rear;
+        }
+
+        @Override
+        public boolean hasNext() {
+            return (p!=null);
+        }
+        @Override
+        public T next() {
+            T out = (T) p.element;
+            p = p.prev;
+            return out; 
+        }
+    }
 
     /**
      * Returns an iterator over the members of the power set
@@ -472,7 +576,43 @@ public class LinkedSet<T extends Comparable<T>> implements Set<T> {
      * @return  an iterator over members of the power set
      */
     public Iterator<Set<T>> powerSetIterator() {
-        return null;
+        return new PowerSetIterator(this);
+    }
+
+    class PowerSetIterator implements Iterator<Set<T>>{
+        int curr; 
+        int max;
+        char[] b_curr;
+        Node front; 
+        Node p;
+        public PowerSetIterator(LinkedSet<T> s){
+            curr = 0;
+            b_curr = Integer.toBinaryString(curr).toCharArray();
+            assert s.size() >= 0; //prevent fractional max
+            max = (int) Math.pow(2, s.size());
+            front = s.front;
+        }
+        @Override
+        public boolean hasNext() {
+            return (curr < max);
+        }
+        @Override
+        public Set<T> next() { 
+            LinkedSet<T> out = new LinkedSet<>();
+            p = front;
+            for (int i = b_curr.length - 1; i >= 0; i--){
+                if (b_curr[i] == '1'){
+                    out.add(p.element);
+                }
+                if (p != null){
+                    p = p.next;
+                }
+            }
+            b_curr = Integer.toBinaryString(++curr).toCharArray();
+            return out; 
+        }
+
+        
     }
 
 
