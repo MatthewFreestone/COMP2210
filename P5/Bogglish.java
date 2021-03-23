@@ -122,6 +122,7 @@ public class Bogglish implements WordSearchGame{
 
    @Override
    public SortedSet<String> getAllScorableWords(int minimumWordLength) {
+       foundWords = new TreeSet<String>();
       if (minimumWordLength < 1){
          throw new IllegalArgumentException();
       }
