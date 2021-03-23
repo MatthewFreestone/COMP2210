@@ -1,0 +1,29 @@
+Straegy
+
+1. Get board
+2. Get Dictionary
+
+Request: Find all of the words(above a length) on the board
+1. For each vertex on the board
+    a. dfs:
+        i. if the current path is no longer a prefix on tree, stop (also elimiates too long)
+        ii. if current path is a leaf on tree, add to foundWords
+
+
+
+
+[0, 2]
+[0, 2, 1]
+[0, 2, 1, 3]
+[0, 2, 3]
+[0, 2, 3, 1]
+[0, 1]
+[0, 1, 2]
+[0, 1, 2, 3]
+[0, 1, 3]
+[0, 1, 3, 2]
+[0, 3]
+[0, 3, 2]
+[0, 3, 2, 1]
+[0, 3, 1]
+[0, 3, 1, 2]
