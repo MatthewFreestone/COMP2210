@@ -14,6 +14,7 @@ public class Bogglish implements WordSearchGame{
    private SortedSet<String> foundWords;
    private ArrayList<Integer>[] adjList;
    private int V;
+   private boolean loaded;
 
    public Bogglish(){
       dict = new Trie();
@@ -22,6 +23,7 @@ public class Bogglish implements WordSearchGame{
       adjList = null;
       foundWords = new TreeSet<String>();
       V = 0;
+      loaded = false;
    }
 
    @Override
@@ -46,14 +48,17 @@ public class Bogglish implements WordSearchGame{
          dict.insert(toAdd);
       }
       fileIO.close();
-      
+      loaded = true;
    }
 
 
    @Override
    public void setBoard(String[] letterArray) {
+      if(letterArray == null){
+          throw new IllegalArgumentException();
+      }
       int size = (int) Math.floor(Math.sqrt(letterArray.length));
-      if (size == 0 || size*size != letterArray.length){
+      if (size*size != letterArray.length){
          throw new IllegalArgumentException();
       }
       V = (int)Math.pow(size, 2);
@@ -64,7 +69,7 @@ public class Bogglish implements WordSearchGame{
             board[i][j] = letterArray[i*size + j];
          }
       }
-      createAdjList(); //TODO can i keep this
+      createAdjList(); 
    }
 
    @SuppressWarnings("unchecked")
@@ -120,7 +125,7 @@ public class Bogglish implements WordSearchGame{
       if (minimumWordLength < 1){
          throw new IllegalArgumentException();
       }
-      if (dict == null){
+      if (!loaded){
          throw new IllegalStateException();
       }
       //createAdjList();
@@ -184,7 +189,7 @@ public class Bogglish implements WordSearchGame{
       if (minimumWordLength < 1){
          throw new IllegalArgumentException();
       }
-      if (dict == null){
+      if (!loaded){
          throw new IllegalStateException();
       }
       int total = 0;
@@ -202,7 +207,7 @@ public class Bogglish implements WordSearchGame{
       if (wordToCheck == null){
          throw new IllegalArgumentException();
       }
-      if (dict == null){
+      if (!loaded){
          throw new IllegalStateException() ;
       }
       return dict.containsWord(wordToCheck);
@@ -212,7 +217,7 @@ public class Bogglish implements WordSearchGame{
       if (prefixToCheck == null){
          throw new IllegalArgumentException();
       }
-      if (dict == null){
+      if (!loaded){
          throw new IllegalStateException();
       }
       return dict.containsPrefix(prefixToCheck);
@@ -225,7 +230,7 @@ public class Bogglish implements WordSearchGame{
       if (wordToCheck == null){
          throw new IllegalArgumentException();
       }
-      if (dict == null){
+      if (!loaded){
          throw new IllegalStateException();
       }
       Trie onBTrie = new Trie();
