@@ -39,7 +39,8 @@ public class ExampleClient {
 
         System.out.println(doublets.getNeighbors("tiger"));
 
-        System.out.println(doublets.getMinLadder("cat", "hat"));
+        //System.out.println(doublets.getMinLadder("cat", "hat"));
+        System.out.println(doublets.getMinLadder("heart", "smart"));
     }
 }
 

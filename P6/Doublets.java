@@ -4,6 +4,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
@@ -12,13 +13,14 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Scanner;
 import java.util.TreeSet;
+import java.util.Collections;
 
 import java.util.stream.Collectors;
 
 /**
  * Provides an implementation of the WordLadderGame interface. 
  *
- * @author Your Name (you@auburn.edu)
+ * @author Matthew Freestone (maf0083@auburn.edu)
  */
 public class Doublets implements WordLadderGame {
 
@@ -52,6 +54,7 @@ public class Doublets implements WordLadderGame {
                 /////////////////////////////////////////////////////////////
                 // INSERT CODE HERE TO APPROPRIATELY STORE str IN lexicon. //
                 /////////////////////////////////////////////////////////////
+                lexicon.add(str.toLowerCase());
                 s.nextLine();
             }
             in.close();
@@ -86,14 +89,15 @@ public class Doublets implements WordLadderGame {
 
     @Override
     public List<String> getNeighbors(String word) {
-        char[] ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".toCharArray();
+        char[] ALPHABET = "abcdefghijklmnopqrstuvwxyz".toCharArray();
         char[] checking = word.toCharArray();
         List<String> neighbors = new ArrayList<String>();
         for (int i = 0; i < word.length(); i++){
             for (char c : ALPHABET){
                 checking[i] = c;
-                if (isWord(checking.toString())){
-                    neighbors.add(checking.toString());
+                String newWord = new String(checking);
+                if (!word.equals(newWord) && isWord(newWord)){
+                    neighbors.add(newWord);
                 }
             }
             checking = word.toCharArray();
@@ -102,8 +106,11 @@ public class Doublets implements WordLadderGame {
     }
     @Override
     public boolean isWordLadder(List<String> sequence) {
+        if (sequence.size() == 0){
+            return false; 
+        }
         for (int i = 1; i < sequence.size(); i++){
-            if (getHammingDistance(sequence.get(i-1), sequence.get(i)) != 1){
+            if (getHammingDistance(sequence.get(i-1), sequence.get(i)) != 1 || !isWord(sequence.get(i))){
                 return false; 
             }
         }
@@ -111,11 +118,75 @@ public class Doublets implements WordLadderGame {
     }
     @Override
     public List<String> getMinLadder(String start, String end) {
-        // TODO Auto-generated method stub
-        return null;
+        List<String> out = new ArrayList<>();
+        HashSet<String> visited = new HashSet<>();
+        if (start == end){
+            out.add(start);
+            return out;
+        }
+        if (getHammingDistance(start, end) == 1){
+            out.add(start);
+            out.add(end);
+            return out; 
+        }
+        Deque<Node> queue = new ArrayDeque<>();
+        queue.addLast(new Node(start));
+        visited.add(start);
+        while(!queue.isEmpty()){
+            Node c = queue.removeFirst();
+            String c_str = c.e;
+            List<String> neighbors = getNeighbors(c_str);
+            for (String word : neighbors){ //check to make sure it doesn't get worse dist
+                //if (!c.contains(word)){
+                if (!visited.contains(word)){
+                    visited.add(word);
+                    if (word.equals(end)){
+                        out.add(word);
+                        out.add(c.e);
+                        Node n = c.prev;
+                        while (n != null){
+                            out.add(n.e);
+                            n = n.prev;
+                        }
+                        Collections.reverse(out);
+                        return out; 
+                    }
+                    queue.addLast(new Node(word, c));
+                }
+
+            }
+        }
+        return out;
     }
 
 
+
+    private class Node {
+        Node prev;
+        String e;
+        Node(String e){
+            this.e = e;
+            this.prev = null;
+        }
+        Node(String e, Node prev){
+            this.e = e;
+            this.prev = prev;
+        }
+
+        boolean contains(String s){
+            if (e.equals(s)){
+                return true;
+            }
+            Node c = this.prev;
+            while(c != null){
+                if (c.e.equals(s)){
+                    return true;
+                }
+                c = c.prev;
+            }
+            return false; 
+        }
+    }
     //////////////////////////////////////////////////////////////
     // ADD IMPLEMENTATIONS FOR ALL WordLadderGame METHODS HERE  //
     //////////////////////////////////////////////////////////////
